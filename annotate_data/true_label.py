@@ -13,9 +13,9 @@ import string
 from datasets import Dataset
 tqdm.pandas()
 from grader import math_equal
-from parser import extract_answer
+from parser import extract_answer, strip_string
 
-
+# print(math_equal('23\nThe answer is: 23', "23"))
 # def math_equal(prediction: Union[bool, float, str],
 #                 reference: Union[float, str],
 #                 include_percentage: bool = True,
@@ -145,29 +145,57 @@ from parser import extract_answer
 # new_dataset.to_json("filtered_dataset.json")
 # print(new_dataset)
 
-ds_dir = "/home/swb9572/iterative-dpo/test_data_with_rewards.json"
+
+# Token name: For repo Iterative-DPO(write)
+os.environ["HF_TOKEN"] = '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'
+
+ds_dir = "/home/swb9572/iterative-dpo/data/basesft_iter1/merge_data.json"
 ds = load_dataset("json", data_files=ds_dir, split="train")
+print(ds)
+
+# filtered_dataset = []
+
+# with torch.no_grad():
+#     for sample in tqdm(ds):
+#         if len(sample["responses"]) < 16:
+#             continue
+#         preprocessed_resps = [resp.lstrip() for resp in sample["responses"]]
+#         # print(preprocessed_resps)
+#         ex_answer = [extract_answer(resp) for resp in preprocessed_resps]
+#         # print(ex_answer)
+#         # print(sample["answer"])
+#         result = [math_equal(ex_answer[i], sample["answer"], include_percentage=True, is_close=True, timeout=True) for i in range(len(preprocessed_resps))]
+#         print(result)
+#         if (all(result)) or (not any(result)):
+#             pass
+#         else:
+#             # new_rewards = [x + 100 if y else x - 100 for x, y in zip(sample["rewards"], result)]
+#             new_rewards = [1 if y else -1 for y in result]
+#             dict = {"prompt": sample["prompt"], "responses": sample["responses"], "rewards": new_rewards, "answer": sample["answer"]}
+#             filtered_dataset.append(dict)
+
+# new_dataset = Dataset.from_list(filtered_dataset)
+# new_dataset.to_json("filtered_dataset.json")
+# print(new_dataset)
 
 filtered_dataset = []
 
-with torch.no_grad():
-    for sample in tqdm(ds):
-        if len(sample["responses"]) < 16:
-            continue
-        preprocessed_resps = [resp.lstrip() for resp in sample["responses"]]
-        print(preprocessed_resps)
-        ex_answer = [extract_answer(resp) for resp in preprocessed_resps]
-        print(ex_answer)
-        print(sample["answer"])
-        result = [math_equal(ex_answer[i], sample["answer"], include_percentage=True, is_close=True, timeout=True) for i in range(len(preprocessed_resps))]
-        print(result)
-        if (all(result)) or (not any(result)):
-            pass
-        else:
-            new_rewards = [x + 100 if y else x - 100 for x, y in zip(sample["rewards"], result)]
-            dict = {"prompt": sample["prompt"], "responses": sample["responses"], "rewards": new_rewards, "answer": sample["answer"]}
-            filtered_dataset.append(dict)
+def tokenize(sample):
+    preprocessed_resps = [resp.lstrip() for resp in sample["responses"]]
+    ex_answer = [strip_string(extract_answer(resp)) for resp in preprocessed_resps]
+    result = [math_equal(ex_answer[i], sample["answer"], include_percentage=True, is_close=True, timeout=True) for i in range(len(preprocessed_resps))]
+    print(result)
+    if (all(result)) or (not any(result)):
+        pass
+    else:
+        new_rewards = [1 if y else -1 for y in result]
+        dict = {"prompt": sample["prompt"], "responses": sample["responses"], "rewards": new_rewards, "answer": sample["answer"]}
+        filtered_dataset.append(dict)
+    return sample
 
+ds = ds.map(tokenize, num_proc=16)
 new_dataset = Dataset.from_list(filtered_dataset)
 new_dataset.to_json("filtered_dataset.json")
 print(new_dataset)
+repo_id = "Yuanxin-Liu/Iter1_generation"  
+new_dataset.push_to_hub(repo_id)
