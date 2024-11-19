@@ -96,6 +96,7 @@ sampling_params = SamplingParams(
     n=script_args.K,
     stop_token_ids=[tokenizer.eos_token_id] + script_args.eos_ids,
     #stop=["<|user|>"],
+    stop=['Question:'],
 )
 
 ds = load_dataset(script_args.dataset_name_or_path)['train']
