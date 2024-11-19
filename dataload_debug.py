@@ -10,6 +10,8 @@ from transformers import (
 )
 from vllm import LLM, SamplingParams
 import json, os, re
+from parser import extract_answer
+import tqdm
 
 # Token name: For repo Iterative-DPO
 os.environ["HF_TOKEN"] = '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'
@@ -48,28 +50,19 @@ ds = load_dataset(dataset_name_or_path)['train']
 # example2 = r"""Question: Samantha’s last name has three fewer letters than Bobbie’s last name. If Bobbie took two letters off her last name, she would have a last name twice the length of Jamie’s. Jamie’s full name is Jamie Grey. How many letters are in Samantha’s last name? Answer: There are 4 letters in Jamie’s last name, so Bobbie’s name is 4*2 +2 = 10 letters long. Samantha’s last name is 3 letters shorter than Bobbie’s, so there are 10 - 3 = 7 letters in Samantha’s last name."""
 # few_shot_cot_prompt = instruct_prompt + '\n' + example2 + f'\nQuestion: '  #'\n' + example1
 
-## for the dataset: RLHF4MATH/prompt_iter1
+
+
+# for the dataset: RLHF4MATH/prompt_iter1
 def tokenize(sample):
-    if sample['type'] in ['gpt-3.5-turbo', 'math', 'MATH_Rephrased']:
-        match = re.search(r'\\box{(.*?)}', sample['solution'])
-        answer_text = match.group(1).strip() if match else ""
-    elif sample['type'] in ['gsm8k', 'GSM_Rephrased', 'GSM_SV', 'GSM_FOBAR']:
+    if sample['type'] in ['gsm8k', 'GSM_Rephrased', 'GSM_SV', 'GSM_FOBAR']:
         answer_text = sample['solution'].split('####')[-1].strip()
-    elif sample['type'] in ['MATH_FOBAR', 'MATH_SV']:
-        if "The answer is:" in sample['solution']:
-            answer_text = sample['solution'].split("The answer is:")[-1].strip()
-        else:
-            answer_text = ""
+    elif sample['type'] in ['gpt-3.5-turbo', 'math', 'MATH_Rephrased', 'MATH_FOBAR', 'MATH_SV']:
+        answer_text = extract_answer(sample['solution'])
     else:
         answer_text = ""
-    sample["answer_text"] = answer_text
+        print("error: unknown type")
+    sample["answer"] = answer_text
     return sample
-
-# ds = ds.map(
-#     lambda x: {
-#         "prompt": tokenizer.apply_chat_template(x[script_args.dataset_key], tokenize=False, add_generation_prompt=True)
-#     }
-# )
 
 ds = ds.map(tokenize, num_proc=16)
 

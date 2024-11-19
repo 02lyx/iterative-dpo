@@ -10,7 +10,7 @@ from transformers import (
 )
 from vllm import LLM, SamplingParams
 import json, os
-
+from parser import extract_answer
 
 @dataclass
 class ScriptArguments:
@@ -68,7 +68,8 @@ class ScriptArguments:
     )
     eos_ids: List[int] = field(default_factory=lambda: [], metadata={"help": "the ids of the end of sentence tokens"})
 
-os.environ["HF_TOKEN"] = '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'
+# Token name: For repo Iterative-DPO
+os.environ["HF_TOKEN"] = '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'
 parser = HfArgumentParser(ScriptArguments)
 script_args = parser.parse_args_into_dataclasses()[0]
 
@@ -107,13 +108,28 @@ ds = load_dataset(script_args.dataset_name_or_path)['train']
 # few_shot_cot_prompt = instruct_prompt + '\n' + example2 + f'\nQuestion: '  #'\n' + example1
 
 ## for the dataset: RLHFlow/test_generation_2k
-def tokenize(sample):
-    if sample['']
-    answer_text = sample['solution'].split('####')[-1].strip()
-    sample["few_shot_cot_question"] = few_shot_cot_prompt + sample['question']
-    sample["answer_text"] = f"The answer is {answer_text}."
-    return sample
+# def tokenize(sample):
+#     if sample['']
+#     answer_text = sample['solution'].split('####')[-1].strip()
+#     sample["few_shot_cot_question"] = few_shot_cot_prompt + sample['question']
+#     sample["answer_text"] = f"The answer is {answer_text}."
+#     return sample
 
+instruct_prompt = r"Please reason step by step, and put your final answer within \\boxed{{}}"
+example = r"Question: What is the sum of the following infinite geometric series: $\frac{1}{3} - \frac{1}{9} + \frac{1}{27} - \frac{1}{81} + \frac{1}{243} - \frac{1}{729} + \frac{1}{2187} - \cdots$? Answer: To find the sum of an infinite geometric series, we need to determine if the series converges or diverges. In this case, we have a common ratio of $-\frac{1}{3}$. The series will converge if the absolute value of the common ratio is less than 1, and it will diverge otherwise. In this case, since $\left| -\frac{1}{3} \right| = \frac{1}{3} < 1$, the series converges. Next, we can use the formula for the sum of an infinite geometric series to find its value. The formula is given by: $$ S = \frac{a}{1-r} $$ where $S$ is the sum of the series, $a$ is the first term, and $r$ is the common ratio. In this case, the first term $a$ is $\frac{1}{3}$ and the common ratio $r$ is $-\frac{1}{3}$. Plugging these values into the formula, we have: $$ S = \frac{\frac{1}{3}}{1 - \left(-\frac{1}{3}\right)} $$ Simplifying the denominator, we get: $$ S = \frac{\frac{1}{3}}{\frac{4}{3}} $$ Dividing the numerator and denominator, we obtain: $$ S = \frac{1}{4} $$ Therefore, the sum of the given infinite geometric series is $\boxed{\frac{1}{4}}$. The answer is: \frac{1}{4}"
+few_shot_cot_prompt = instruct_prompt + '\n' + example + f'\nQuestion: '  
+
+def tokenize(sample):
+    sample["prompt"] = few_shot_cot_prompt + sample['question']
+    if sample['type'] in ['gsm8k', 'GSM_Rephrased', 'GSM_SV', 'GSM_FOBAR']:
+        answer_text = sample['solution'].split('####')[-1].strip()
+    elif sample['type'] in ['gpt-3.5-turbo', 'math', 'MATH_Rephrased', 'MATH_FOBAR', 'MATH_SV']:
+        answer_text = extract_answer(sample['solution'])
+    else:
+        answer_text = ""
+        print("error: unknown type")
+    sample["answer"] = answer_text
+    return sample
 # ds = ds.map(
 #     lambda x: {
 #         "prompt": tokenizer.apply_chat_template(x[script_args.dataset_key], tokenize=False, add_generation_prompt=True)
@@ -131,7 +147,7 @@ print(ds, script_args.dataset_name_or_path)
 print(ds[0])
 
 
-prompts = [ds[i]["few_shot_cot_question"] for i in range(len(ds))]
+prompts = [ds[i]["prompt"] for i in range(len(ds))]
 outputs = llm.generate(prompts, sampling_params=sampling_params, use_tqdm=True)
 
 
@@ -139,13 +155,13 @@ completions = []
 used_prompts = []
 gathered_data = []
 for i, output in enumerate(outputs):
-    tmp_data = {"prompt": ds[i]["few_shot_cot_question"], "question": ds[i]["question"], "responses": [out.text for out in output.outputs]}
+    tmp_data = {"prompt": ds[i]["prompt"], "question": ds[i]["question"], "responses": [out.text for out in output.outputs], "answer": ds[i]["answer"]}
     gathered_data.append(tmp_data)
 
 
 print("I collect ", len(gathered_data), "samples")
 
-
+os.makedirs(script_args.output_dir, exist_ok=True)
 with open(script_args.output_dir + str(script_args.local_index) + ".json", "w", encoding="utf8") as f:
     for i in range(len(gathered_data)):
         json.dump(gathered_data[i], f, ensure_ascii=False)

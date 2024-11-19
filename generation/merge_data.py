@@ -4,11 +4,14 @@ from dataclasses import dataclass, field
 from typing import Optional
 from datasets import load_dataset
 from transformers import HfArgumentParser
-
+import os
+# import Dataset
 """
 If we use multiple VLLM processes to accelerate the generation, we need to use this script to merge them.
 """
-
+ 
+# Token name: For repo Iterative-DPO
+os.environ["HF_TOKEN"] = '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'
 
 @dataclass
 class ScriptArguments:
@@ -46,6 +49,10 @@ for my_dir in all_dirs:
 random.shuffle(gathered_data)
 
 print("I collect ", len(gathered_data), "samples")
+
+# dataset = Dataset.from_list(gathered_data)
+# repo_id = "Yuanxin-Liu/Iter1_generation"  
+# dataset.push_to_hub(repo_id)
 
 with open(script_args.output_dir, "w", encoding="utf8") as f:
     for i in range(len(gathered_data)):
