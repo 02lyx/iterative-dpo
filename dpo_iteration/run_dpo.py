@@ -193,7 +193,7 @@ def prepare_data(
 
 if __name__ == "__main__":
 
-    
+    os.environ["HF_TOKEN"] = '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'
     parser = H4ArgumentParser((ScriptArguments, DPOConfig, ModelConfig))
     script_args, training_args, model_config = parser.parse()
 

@@ -178,24 +178,24 @@ print(ds)
 # new_dataset.to_json("filtered_dataset.json")
 # print(new_dataset)
 
-filtered_dataset = []
 
 def tokenize(sample):
     preprocessed_resps = [resp.lstrip() for resp in sample["responses"]]
     ex_answer = [strip_string(extract_answer(resp)) for resp in preprocessed_resps]
     result = [math_equal(ex_answer[i], sample["answer"], include_percentage=True, is_close=True, timeout=True) for i in range(len(preprocessed_resps))]
-    print(result)
+    # print(result)
     if (all(result)) or (not any(result)):
-        pass
+        sample['pick'] = False
+        sample['rewards'] = []
     else:
+        sample['pick'] = True
         new_rewards = [1 if y else -1 for y in result]
-        dict = {"prompt": sample["prompt"], "responses": sample["responses"], "rewards": new_rewards, "answer": sample["answer"]}
-        filtered_dataset.append(dict)
+        sample['rewards'] = new_rewards
     return sample
 
 ds = ds.map(tokenize, num_proc=16)
-new_dataset = Dataset.from_list(filtered_dataset)
-new_dataset.to_json("filtered_dataset.json")
+new_dataset = ds.filter(lambda x: x['pick'] == True)
 print(new_dataset)
 repo_id = "Yuanxin-Liu/Iter1_generation"  
 new_dataset.push_to_hub(repo_id)
+new_dataset.to_json("data/basesft_iter1/filtered_dataset.json")

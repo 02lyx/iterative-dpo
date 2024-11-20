@@ -4,7 +4,7 @@
 #     --device cuda:0\
 #     --batch_size 8
 lm_eval --model hf \
---model_args pretrained=Online-RLHF/pipeline_test/no_fast_attn \
+--model_args pretrained=/home/swb9572/iterative-dpo/pipeline_test/baseline_sft \
 --tasks gsm8k \
 --device cuda:0 \
 --batch_size 8 \

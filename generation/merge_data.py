@@ -11,7 +11,7 @@ If we use multiple VLLM processes to accelerate the generation, we need to use t
 """
  
 # Token name: For repo Iterative-DPO
-os.environ["HF_TOKEN"] = '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'
+# os.environ["HF_TOKEN"] = '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'
 
 @dataclass
 class ScriptArguments:
