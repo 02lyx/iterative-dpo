@@ -2,10 +2,10 @@
 # The generated samples will be stored at output_dir + local_index + ".jsonl
 
 my_world_size=4 # how many gpu you use
-infer_model="ZhangShenao/baseline-gemma-2-2b-it-sft"
-prompt_dir="RLHF4MATH/prompt_iter1"
+infer_model="pipeline_test/baseline_sft_iter2"
+prompt_dir="RLHF4MATH/prompt_iter3"
 # mkdir data
-output_dir=./data/basesft_iter1
+output_dir=./data/basesft_iter3
 
 # conda init
 # conda activate vllm
@@ -22,4 +22,4 @@ CUDA_VISIBLE_DEVICES=4 python ./generation/gen_hf2.py --model_name_or_path ${inf
 # then, we merge the 8 datasets into one dataset.
 wait
 # python ./generation/merge_data.py --base_path ${output_dir} --output_dir './data/gen_data.json' --num_datasets ${my_world_size}
-# python ./generation/merge_data.py --base_path './data/basesft_iter1' --output_dir './data/basesft_iter1/merge_data.json' --num_datasets 4
+# python ./generation/merge_data.py --base_path './data/basesft_iter3' --output_dir './data/basesft_iter3/merge_data.json' --num_datasets 4
