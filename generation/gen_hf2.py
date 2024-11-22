@@ -161,7 +161,7 @@ for i, output in enumerate(outputs):
 
 print("I collect ", len(gathered_data), "samples")
 
-os.makedirs(script_args.output_dir, exist_ok=True)
+# os.makedirs(script_args.output_dir, exist_ok=True)
 with open(script_args.output_dir + str(script_args.local_index) + ".json", "w", encoding="utf8") as f:
     for i in range(len(gathered_data)):
         json.dump(gathered_data[i], f, ensure_ascii=False)

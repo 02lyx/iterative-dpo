@@ -1,9 +1,9 @@
 choose_type: max_min
-train_dir: /home/swb9572/iterative-dpo/data/basesft_iter3/filtered_dataset.json
-eval_dir: /home/swb9572/iterative-dpo/data/basesft_iter3/filtered_dataset.json
-output_dir: ./pipeline_test/baseline_sft_iter3
-model_name_or_path: "pipeline_test/baseline_sft_iter2"
-ref_model: "pipeline_test/baseline_sft_iter2"
+train_dir: /home/swb9572/iterative-dpo/data/filtered_dataset.json
+eval_dir: /home/swb9572/iterative-dpo/data/filtered_dataset.json
+output_dir: ./pipeline_test/test/
+model_name_or_path: "ZhangShenao/baseline-gemma-2-2b-it-sft"
+ref_model: "ZhangShenao/baseline-gemma-2-2b-it-sft"
 # model_name_or_path: "RLHFlow/LLaMA3-SFT"
 # ref_model: "RLHFlow/LLaMA3-SFT"
 bf16: true

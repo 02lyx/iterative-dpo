@@ -13,7 +13,7 @@ import string
 from datasets import Dataset
 tqdm.pandas()
 from grader import math_equal
-from utils.parser import extract_answer, strip_string
+from parser import extract_answer, strip_string
 import argparse
 
 def parse_arguments():
@@ -61,10 +61,10 @@ def tokenize(sample):
     # print(result)
     if (all(result)) or (not any(result)):
         sample['pick'] = False
-        sample['rewards'] = []
+        sample['rewards'] = [0.0]
     else:
         sample['pick'] = True
-        new_rewards = [1 if y else -1 for y in result]
+        new_rewards = [1.0 if y else -1.0 for y in result]
         sample['rewards'] = new_rewards
     return sample
 
@@ -73,8 +73,8 @@ new_dataset = ds.filter(lambda x: x['pick'] == True)
 print(new_dataset)
 
 # new_dataset.to_json("data/basesft_iter3/filtered_dataset.json")
-os.makedirs(args.output_dir, exist_ok=True)
-new_dataset.to_json(args.output_dir + "/filtered_dataset.json")
+# os.makedirs(args.output_dir, exist_ok=True)
+new_dataset.to_json(args.output_dir)
 
 # repo_id = "Yuanxin-Liu/Iter3_generation"  
 if args.repo_id:
