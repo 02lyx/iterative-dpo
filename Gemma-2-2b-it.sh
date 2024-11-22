@@ -80,7 +80,7 @@ EOT
 for i in {1..3}
 do
     iteration_name="Gemma-2-2b-it_iter${i}"
-    jsonl_input="RLHF4MATH/prompt_iter{i}"
+    jsonl_input="RLHF4MATH/prompt_iter${i}"
     json_output="${base_path}/${iteration_prefix}${i}_${iteration_name}"
     model_output="${base_path}/${iteration_prefix}${i}_${iteration_name}_reward.json"
 
