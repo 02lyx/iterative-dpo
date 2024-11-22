@@ -6,7 +6,7 @@ eval "$(conda shell.bash hook)"
 
 # Base paths and settings
 initial_model="ZhangShenao/baseline-gemma-2-2b-it-sft"
-base_path="./iter_dpo"
+base_path="./iter_dpo_testGemma-2-2b-it"
 mkdir $base_path
 iteration_prefix="Test"
 
@@ -19,7 +19,7 @@ run_iteration() {
     local model_output=$5
 
     conda init
-    conda activate data-eval
+    conda activate gen-eval
     #bash generation/register_server.sh $model_path
     #sleep 140
     #python generation/gen_hf2.py --model_name_or_path $model_path dataset_name_or_path $jsonl_input 
@@ -28,10 +28,10 @@ run_iteration() {
     infer_model=$2
     prompt_dir=$3
     output_dir=$4
-    CUDA_VISIBLE_DEVICES=0 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 0 --my_world_size ${my_world_size} &
-    CUDA_VISIBLE_DEVICES=1 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 1 --my_world_size ${my_world_size} &
-    CUDA_VISIBLE_DEVICES=2 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 2 --my_world_size ${my_world_size} &
-    CUDA_VISIBLE_DEVICES=3 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 3 --my_world_size ${my_world_size} &
+    CUDA_VISIBLE_DEVICES=1 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 0 --my_world_size ${my_world_size} &
+    CUDA_VISIBLE_DEVICES=2 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 1 --my_world_size ${my_world_size} &
+    CUDA_VISIBLE_DEVICES=3 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 2 --my_world_size ${my_world_size} &
+    CUDA_VISIBLE_DEVICES=4 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 3 --my_world_size ${my_world_size} &
     # CUDA_VISIBLE_DEVICES=4 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 4 --my_world_size ${my_world_size} &
     # CUDA_VISIBLE_DEVICES=5 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 5 --my_world_size ${my_world_size} &
     # CUDA_VISIBLE_DEVICES=6 python ./generation/gen_hf2.py --model_name_or_path ${infer_model} --dataset_name_or_path ${prompt_dir} --output_dir ${output_dir} --K 4 --temperature 1.0 --local_index 6 --my_world_size ${my_world_size} &
@@ -40,7 +40,7 @@ run_iteration() {
     python ./generation/merge_data.py --base_path ${output_dir} --output_dir "${output_dir}_data.json" --num_datasets 4
     # accelerate launch annotate_data/get_rewards.py --dataset_name_or_path "${output_dir}_data.jsonl" --output_dir $model_output
     conda init
-    conda activate train-only
+    conda activate anno-train
     python annotate_data/true_label.py --ds_dir "${output_dir}_data.json" --output_dir $model_output
     # conda activate rlhflow
     cat <<EOT > dpo_config.yaml
@@ -78,7 +78,7 @@ EOT
 # Main loop for iterations
 for i in {1..3}
 do
-    iteration_name="LLaMA3_iter${i}"
+    iteration_name="testGemma-2-2b-it_iter${i}"
     jsonl_input="Yuanxin-Liu/Test-Dataset"
     json_output="${base_path}/${iteration_prefix}${i}_${iteration_name}"
     model_output="${base_path}/${iteration_prefix}${i}_${iteration_name}_reward.json"
@@ -88,7 +88,7 @@ do
         model_path=$initial_model
     else
         previous_iteration=$((i-1))
-        model_path="./LLaMA3_iter${previous_iteration}"
+        model_path="./testGemma-2-2b-it_iter${previous_iteration}"
     fi
 
     run_iteration $iteration_name $model_path $jsonl_input $json_output $model_output

@@ -39,4 +39,4 @@ to run iterative dpo for the model Gemma-2-2b-it, and then run
 conda activate gen-eval
 bash eval.sh
 ```
-to evaluate model perforcement on GSM8K. Thanks for your effort and please let me know the result. If it works well, run the file ```upload_model.py``` under the environment ```anno-train```to upload the model to my huggingface account.
+to evaluate model perforcement on GSM8K. At last, running the file ```upload_model.py``` under the environment ```anno-train```to upload the model to my huggingface account.

@@ -67,12 +67,12 @@ eval_strategy: steps
 bf16: true
 per_device_train_batch_size: 4
 per_device_eval_batch_size: 1
-gradient_accumulation_steps: 4
+gradient_accumulation_steps: 2
 report_to: wandb
 label_smoothing: 0.1
 EOT
 
-    accelerate launch --config_file ./configs/zero2.yaml dpo_iteration/run_dpo.py dpo_config.yaml
+    accelerate launch --config_file ./configs/zero3.yaml dpo_iteration/run_dpo.py dpo_config.yaml
 }
 
 
