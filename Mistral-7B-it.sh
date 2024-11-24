@@ -49,7 +49,7 @@ run_name: $iteration
 output_dir: $iteration
 model_name_or_path: $model_path
 ref_model: $model_path
-learning_rate: 5.0e-7
+learning_rate: 2.0e-7
 num_train_epochs: 2
 logging_steps: 2
 gradient_checkpointing: true
