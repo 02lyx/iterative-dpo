@@ -65,9 +65,9 @@ max_length: 2048
 max_prompt_length: 1000
 eval_strategy: steps
 bf16: true
-per_device_train_batch_size: 2
+per_device_train_batch_size: 1
 per_device_eval_batch_size: 1
-gradient_accumulation_steps: 4
+gradient_accumulation_steps: 8
 report_to: wandb
 label_smoothing: 0.1
 EOT
