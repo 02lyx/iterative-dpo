@@ -6,6 +6,6 @@ bash env_setup.sh
 export WANDB_API_KEY=6f9e1eaf73cd08b4f0cd4674c7856201f2453428
 huggingface-cli login  --token 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
 
-bash Llama-3-8B-it.sh
+bash Gemma-2-2b-it.sh
 
-huggingface-cli upload Yuanxin-Liu/Llama-3-8b-it-idpo-2 Llama-3-8b-it_iter3 --token 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
+huggingface-cli upload Yuanxin-Liu/Gemma-2-2b-it-idpo-2 Gemma-2-2b-it_iter3 --token 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

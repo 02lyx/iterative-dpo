@@ -8,4 +8,4 @@ huggingface-cli login  --token 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
 
 bash Gemma-1.1-7b-it.sh
 
-huggingface-cli upload Yuanxin-Liu/Gemma-1.1-7b-it-idpo Gemma-1.1-7b-it_iter3 --token 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
+huggingface-cli upload Yuanxin-Liu/Gemma-1.1-7b-it-idpo-2 Gemma-1.1-7b-it_iter3 --token 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

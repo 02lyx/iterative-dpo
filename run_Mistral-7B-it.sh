@@ -8,4 +8,4 @@ huggingface-cli login  --token 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
 
 bash Mistral-7B-it.sh
 
-huggingface-cli upload Yuanxin-Liu/Mistral-7b-it-idpo Mistral-7b-it_iter3 --token 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
+huggingface-cli upload Yuanxin-Liu/Mistral-7b-it-idpo-2 Mistral-7b-it_iter3 --token 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
