@@ -72,7 +72,7 @@ report_to: wandb
 label_smoothing: 0.1
 EOT
 
-    accelerate launch --config_file ./configs/zero3.yaml dpo_iteration/run_dpo.py dpo_config.yaml
+    accelerate launch --config_file ./configs/zero3.yaml dpo_iteration/run_dpo.py dpo_config.yaml --main_process_port $PORT1
 }
 
 
